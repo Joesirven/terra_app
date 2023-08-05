@@ -15,9 +15,9 @@ class Course(models.Model):
 
     class ActiveCourses(models.Manager):
         def get_queryset(self) -> QuerySet:
-            return super().get_queryset().filer(is_active=True)
+            return super().get_queryset().filter(is_active=True)
 
-    course_code = models.CharField(max_length=50,)
+    course_code = models.CharField(max_length=50, unique=True,)
     name = models.CharField(max_length=150)
     description = models.TextField()
     department = models.ForeignKey(
@@ -38,3 +38,8 @@ class Course(models.Model):
 
     def __str__(self):
         return self.course_code
+
+class Section(models.Model):
+    section_num = models.CharField(max_length=50,)
+    course = models.ForeignKey(Course, related_name="section", on_delete=models.CASCADE,)
+    teacher =
