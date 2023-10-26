@@ -24,16 +24,18 @@ public class TextMessageConsumer {
     }
 
     public void sendMessage(String toPhoneNumber, String messageBody) {
-        Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
+        Twilio.init("AC793f8989c1045ff4755a0c053d24e09e", "fbc809d084ce06fc3085bd717da52506");
 
         Message message = Message.creator(
             new PhoneNumber(toPhoneNumber),
-            new PhoneNumber(twilioConfig.getFromPhoneNumber()),
+            new PhoneNumber("+18669064498"),
             messageBody
         ).create();
 
         System.out.println("Message sent: " + message.getSid());
     }
+
+
 
     // public TextMessageConsumer(String brokers, String topic, String groupId) {
     //     Properties properties = new Properties();
@@ -54,4 +56,3 @@ public class TextMessageConsumer {
     //         });
     //     }
     }
-}
