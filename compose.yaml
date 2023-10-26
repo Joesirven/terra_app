@@ -2,7 +2,7 @@ volumes:
   beta-data:
     external: true
 services:
-  react:
+  web_client:
     image: node:lts-bullseye
     command: /bin/bash run.sh
     working_dir: /app
@@ -25,6 +25,21 @@ services:
     ports:
       - 15432:5432
   api:
+    build:
+      context: ./Backend/accounts/api
+      dockerfile: ./Dockerfile.dev
+    volumes:
+      - ./service/poll:/app
+      - ./service/api/service_project:/app/service_project
+      - ./service/api/service_rest:/app/service_rest
+    depends_on:
+      - database
+      - service-api
+    environment:
+      DATABASE_URL: postgres://service:password@database:5432/service
+      WAIT_HOSTS: database:5432,service-api:8000
+      WAIT_TIMEOUT: 240
+  backend:
     build:
       context: ./Backend/accounts/api
       dockerfile: ./Dockerfile.dev
