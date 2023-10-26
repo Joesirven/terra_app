@@ -8,8 +8,11 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Properties;
+import java.net.URI;
+import java.math.BigDecimal;
 
 import com.twilio.Twilio;
+import com.twilio.converter.Promoter;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 
@@ -20,7 +23,7 @@ public class TextMessageConsumer {
         this.twilioConfig = new TwilioConfig();
     }
 
-    public void sendMesage(String toPhoneNumber, String messageBody) {
+    public void sendMessage(String toPhoneNumber, String messageBody) {
         Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
 
         Message message = Message.creator(
