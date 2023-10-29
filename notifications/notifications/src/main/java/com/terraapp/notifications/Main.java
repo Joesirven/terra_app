@@ -7,7 +7,7 @@ package com.terraapp.notifications;
 public class Main {
     public static void main(String[] args) {
         System.out.printf("Hello and welcome!");
-        TextMessageConsumer consumer = new TextMessageConsumer();
+        TwilioSender consumer = new TwilioSender();
 
         consumer.sendMessage("+17862738343", "Hello from Java!");
 

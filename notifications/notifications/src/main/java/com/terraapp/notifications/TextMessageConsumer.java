@@ -1,30 +1,49 @@
 package com.terraapp.notifications;
 
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
+
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
 
 public class TextMessageConsumer {
-    private final TwilioConfig twilioConfig;
+    public static void main(String[] args) {
+        // Configure Kafka
+        Properties properties = new Properties();
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "your_group_id");
+        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-    public TextMessageConsumer() {
-        this.twilioConfig = new TwilioConfig();
+        // Create Kafka consumer
+        Consumer<String, String> consumer = new KafkaConsumer<>(properties);
 
-        System.out.println("Twilio account SID: " + twilioConfig.getAccountSid());
-        System.out.println("Twilio auth token: " + twilioConfig.getAuthToken());
-        System.out.println("Twilio phone number: " + twilioConfig.getFromPhoneNumber());
-    }
+        // Subscribe to topic
+        consumer.subscribe(Collections.singleton("your_topic_name"));
 
-    public void sendMessage(String toPhoneNumber, String messageBody) {
+        // Load Twilio configuration
+        TwilioConfig twilioConfig = new TwilioConfig();
+        TwilioSender twilioSender = new TwilioSender(twilioConfig);
 
-        Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
+        // Poll for new data
+        while (true) {
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
-        Message message = Message.creator(
-            new PhoneNumber(toPhoneNumber),
-            new PhoneNumber(twilioConfig.getFromPhoneNumber()),
-            messageBody
-        ).create();
+            records.forEach(record -> {
+                System.out.printf("Received record with key %s and value %s%n", record.key(), record.value());
 
-        System.out.println("Message sent: " + message.getSid());
+                // TODO: Extract phone number and message from record.value() and validate them
+                String phoneNumber = "+1234567890"; // Placeholder value
+                String message = record.value(); // Using the record value directly as the message
+
+                // Send SMS
+                twilioSender.sendMessage(phoneNumber, message);
+            });
+        }
     }
 }
