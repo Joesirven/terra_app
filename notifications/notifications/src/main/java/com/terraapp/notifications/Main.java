@@ -6,10 +6,22 @@ package com.terraapp.notifications;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.printf("Hello and welcome!");
-        TwilioSender consumer = new TwilioSender();
+        System.out.println("Hello and welcome!");
+        TextMessageConsumer consumer = new TextMessageConsumer();
 
-        consumer.sendMessage("+17862738343", "Hello from Java!");
+        Thread consumerThread = new Thread(consumer::start);
+        consumerThread.start();
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("Shutting down consumer...");
+            consumer.shutdown();
+            try {
+                consumerThread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                System.out.println("Shutdown interrupted: " + e.getMessage());
+            }
+            System.out.println("Consumer shut down successfully");
+        }));
     }
 }
