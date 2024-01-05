@@ -6,7 +6,7 @@ import Link from 'next/link';
 const Navbar = () => {
     return (
       <motion.div
-        className="fixed inset-x-0 bottom-0 w-full p-7 z-100 flex justify-center items-center rounded-full"
+        className="hidden sm:flex fixed inset-x-0 bottom-0 w-full p-7 z-100 justify-center items-center rounded-full"
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -23,13 +23,16 @@ const Navbar = () => {
                       paddingLeft: '38px',
                       paddingRight: '38px'
                     }}
-                    className="text-white p-4 font-bold rounded-full hover:bg-white hover:text-black transition-colors cursor-pointer pb-4 duration-200"
+                    className="text-white p-4 font-bold rounded-full bg-zinc-800 hover:bg-white hover:text-black transition-colors cursor-pointer pb-4 duration-200"
                 >
                 </Link>
                 <Link href="#hero" className="text-white p-4 font-bold rounded-full hover:bg-white hover:text-black transition-colors">
-                    Benefits
+                    About
                 </Link>
-                <Link href="#hero" className="text-white p-4 font-bold rounded-full hover:bg-white hover:text-black transition-colors">
+                <Link href="/auth/" className="text-white p-4 font-bold rounded-full hover:bg-white hover:text-black transition-colors">
+                    Add Your School
+                </Link>
+                <Link href="/auth/login" className="text-white p-4 font-bold rounded-full bg-zinc-800 hover:bg-white hover:text-black transition-colors">
                     Login
                 </Link>
 
