@@ -1,13 +1,21 @@
 volumes:
+  postgres-data:
+    external: true
   beta-data:
+    external: true
+  pg-admin:
+    external: true
+  kafka-data:
+    external: true
+  twilio-consumer:
     external: true
 services:
   web_client:
     image: node:lts-bullseye
-    command: /bin/bash run.sh
+    command: npm run dev
     working_dir: /app
     volumes:
-      - ./Client//ghi/app:/app
+      - ./web:/app
     ports:
       - "3000:3000"
     environment:
@@ -15,42 +23,43 @@ services:
       NODE_ENV: development
       HOST: "0.0.0.0"
   database:
-    image: postgres:14.2-bullseye
+    image: postgres:14.5-bullseye
     volumes:
+      - postgres-data:/var/lib/postgresql/data
       - beta-data:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d
     environment:
-      - POSTGRES_MULTIPLE_DATABASES=inventory,sales,service
-      - POSTGRES_PASSWORD=test-databases
+      - POSTGRES_DB=db
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=user
     ports:
       - 15432:5432
+  zookeeper:
+    build:
+      context: ./notifications
+      dockerfile: Dockerfile.zookeeper
+  kafka:
+    build:
+      context: ./notifications
+      dockerfile: Dockerfile.kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
   api:
     build:
-      context: ./Backend/accounts/api
-      dockerfile: ./Dockerfile.dev
+      context: ./api
+      dockerfile: .dockerfile
     volumes:
-      - ./service/poll:/app
-      - ./service/api/service_project:/app/service_project
-      - ./service/api/service_rest:/app/service_rest
+      - ./api:/app
     depends_on:
       - database
-      - service-api
     environment:
-      DATABASE_URL: postgres://service:password@database:5432/service
-      WAIT_HOSTS: database:5432,service-api:8000
+      DATABASE_URL: postgres://user:password@database:5432/db
+      WAIT_HOSTS: database:5432,api:8000
       WAIT_TIMEOUT: 240
-  backend:
-    build:
-      context: ./Backend/accounts/api
-      dockerfile: ./Dockerfile.dev
-    volumes:
-      - ./service/poll:/app
-      - ./service/api/service_project:/app/service_project
-      - ./service/api/service_rest:/app/service_rest
-    depends_on:
-      - database
-      - service-api
-    environment:
-      DATABASE_URL: postgres://service:password@database:5432/service
-      WAIT_HOSTS: database:5432,service-api:8000
-      WAIT_TIMEOUT: 240
+    ports:
+      - "8000:8000"

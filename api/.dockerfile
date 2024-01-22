@@ -2,10 +2,10 @@
 FROM python:3.10.9
 
 # Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
 # Copy the dependencies file to the working directory
-COPY requirements.txt .
+COPY requirements.txt ./
 
 # Install any dependencies
 RUN pip install --no-cache-dir -r requirements.txt
@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Specify the command to run on container start
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD uvicorn main:app --reload --host 0.0.0.0 --port 8000
